@@ -158,6 +158,8 @@
   </div>
 </div>
 
+
+
 <script>
 const programme = {
   1: [
@@ -169,10 +171,17 @@ const programme = {
     { pause: "30s", exos: [{ nom: "Flutter kicks", reps: "3 x 40", img: "img/flutter.jpg" }] },
   ],
   2: [
-    { pause: "75s", exos: [{ nom: "Développé couché", reps: "10", img: "developpe.jpg" }, { nom: "Rowing haltères", reps: "12", img: "rowing.jpg" }] }
+    { pause: "1min", exos: [{ nom: "Squat", reps: "4 x 8", img: "img/squat.jpg" }] },
+    { pause: "1min", exos: [{ nom: "Leg press", reps: "3 x 10", img: "img/leg-press.jpg" }, { nom: "Glute ham raise", reps: "3 x 10", img: "img/ham-raise.jpg" }] },
+    { pause: "90s", exos: [{ nom: "Walking lunges", reps: "4 x 20", img: "img/walking-lunges.jpg" }, { nom: "Leg curl debout", reps: "4 x 10 par jambe", img: "img/leg-curl.jpg" }] },
+    { pause: "60s", exos: [{ nom: "Leg extension dropset", reps: "3 x 7-7-7", img: "img/leg-extension.jpg" }] },
+    { pause: "90s", exos: [{ nom: "Leg curl dropset", reps: "3 x 7-7-7", img: "img/leg-curl-couche.jpg" }] }
   ],
   3: [
-    { pause: "60s", exos: [{ nom: "Planche", reps: "45s", img: "planche.jpg" }, { nom: "Mountain climbers", reps: "30", img: "climbers.jpg" }] }
+    { pause: "90s", exos: [{ nom: "Upright row", reps: "5 x 10", img: "img/upright-row.jpg" }, { nom: "Lateral raise", reps: "5 x 10", img: "img/lateral-raise.jpg" }] },
+    { pause: "1min", exos: [{ nom: "Incline biceps curl", reps: "4 x 8", img: "img/incline-biceps-curl.jpg" }, { nom: "BB triceps pushdown", reps: "4 x 8", img: "img/triceps-pushdown.jpg" }] },
+    { pause: "2min", exos: [{ nom: "Biceps curl alterné", reps: "4 x 16", img: "img/curl-biceps-alterne.gif" }, { nom: "Lying triceps extension", reps: "4 x 12", img: "img/lying-triceps-extension.jpg" }] },
+    { pause: "1min", exos: [{ nom: "Crunch sur BOSU", reps: "3 x 15", img: "img/crunch.jpg" }, { nom: "Knee raise", reps: "3 x 15", img: "img/knee-raise.jpg" }] }
   ]
 };
 
@@ -195,23 +204,20 @@ function openDay(day) {
     grid.innerHTML += `<div class="card"><img src="${exo.img}" alt=""><h4>${exo.nom}</h4><p>${exo.reps}</p></div>`;
   }));
 
-  // Bouton principal sur résumé = "Démarrer"
   document.querySelector('#dayPage .button.suivant').innerText = "Démarrer";
-
   showPage('dayPage');
 }
 
 function startWorkout() {
   currentBlock = 0;
   showBlock();
-  // Bouton principal dans entraînement = "Suivant"
   document.querySelector('#workoutPage .button.suivant').innerText = "Suivant";
   showPage('workoutPage');
 }
 
 function showBlock() {
   const bloc = programme[currentDay][currentBlock];
-  document.getElementById('blockTitle').innerText = "Bloc " + (currentBlock+1);
+  document.getElementById('blockTitle').innerText = "Bloc " + (currentBlock + 1);
   const supersetDiv = document.getElementById('supersetBlock');
   supersetDiv.innerHTML = '';
   bloc.exos.forEach(exo => {
@@ -220,8 +226,9 @@ function showBlock() {
   document.getElementById('pauseTime').innerText = "Repos : " + bloc.pause;
 }
 
+// Bouton "Suivant"
 function nextBlock() {
-  if(currentBlock < programme[currentDay].length - 1) {
+  if (currentBlock < programme[currentDay].length - 1) {
     currentBlock++;
     showBlock();
   } else {
@@ -229,6 +236,19 @@ function nextBlock() {
     goHome();
   }
 }
+
+// Bouton "Retour" dans la page workout
+document.querySelector('#workoutPage .button.retour').onclick = function(e) {
+  e.preventDefault();
+  if (currentBlock > 0) {
+    currentBlock--;
+    showBlock();
+  } else {
+    // Si premier bloc → retour résumé
+    openDay(currentDay);
+  }
+};
 </script>
+
 </body>
 </html>
