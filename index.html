@@ -61,11 +61,15 @@
     transform: scale(0.98);
   }
 
+
   .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    margin: 20px 0;
+      display: flex;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      width: 100%;
+      margin: 20px 0;
+      flex-direction: column;
+      align-content: center;
   }
   .card {
     background: #1e1e1e;
@@ -75,7 +79,45 @@
   }
   .card img { width: 100%; border-radius: 8px; }
 
-  .superset { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; align-items: center; }
+
+  .superset {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin: 20px 0;
+      width: 100%;
+      align-items: stretch;
+      align-content: center;
+      flex-wrap: wrap;
+  }
+
+  #dayGrid .exercise {
+      display: flex;
+      gap: 12px;
+      background: #1e1e1e;
+      border-radius: 10px;
+      padding: 10px;
+      width: 90%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      width: 100%;
+      flex-direction: row;
+      justify-content: left;
+      text-align: left;
+  }
+
+  #dayGrid .exercise img {
+    width: 40%;
+    border-radius: 8px;
+  }
+
+  #dayGrid .exercise .exercise_info{
+    display: flex
+;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+
   .exercise {
     background: #1e1e1e;
     border-radius: 10px;
@@ -219,12 +261,31 @@ function openDay(day) {
   document.getElementById('dayTitle').innerText = "Jour " + day;
   const grid = document.getElementById('dayGrid');
   grid.innerHTML = '';
-  programme[day].forEach(bloc => bloc.exos.forEach(exo => {
-    grid.innerHTML += `<div class="card"><img src="${exo.img}" alt=""><h4>${exo.nom}</h4><p>${exo.reps}</p></div>`;
-  }));
+
+  const dayProgram = programme[day];
+
+  // Afficher chaque bloc séparément
+  dayProgram.forEach((bloc, i) => {
+    let blocHTML = `<div class="superset">
+      <h3>Bloc ${i + 1} (Repos: ${bloc.pause})</h3>`;
+    bloc.exos.forEach(exo => {
+      blocHTML += `<div class="exercise">
+        <img src="${exo.img}" alt="">
+        <div class="exercise_info">
+        <h4>${exo.nom}</h4>
+        <p>${exo.reps}</p>
+        </div>
+      </div>`;
+    });
+    blocHTML += `</div>`;
+    grid.innerHTML += blocHTML;
+  });
+
   document.querySelector('#dayPage .button.suivant').innerText = "Démarrer";
   showPage('dayPage');
 }
+
+
 
 function startWorkout() {
   currentBlock = 0;
