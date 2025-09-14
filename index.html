@@ -7,15 +7,14 @@
   <!-- Icône iPhone / iPad -->
   <link rel="apple-touch-icon" sizes="180x180" href="img/icon-180-v2.png">
 
-  
   <!-- Couleur de fond sur iOS lors du lancement -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-  <!-- Couleur de thème générale (Safari, onglet, multitâche) -->
+  <!-- Couleur de thème générale -->
   <meta name="theme-color" content="#121212">
 
-  <!-- Mode sombre automatique -->
+  <!-- Mode sombre -->
   <meta name="color-scheme" content="dark">
 
 <title>Mon Programme</title>
@@ -35,10 +34,10 @@
 
   h1, h2, h4, p { margin: 10px 0; }
 
-  .page { display: none; flex: 1; flex-direction: column; text-align: center; padding: 20px; overflow-y: auto; }
+  .page { display: none; flex: 1; flex-direction: column; text-align: center; padding: 20px; overflow-y: auto;  padding-bottom: 100px; }
   .active { display: flex; }
 
-  /* Boutons principaux */
+  /* Boutons */
   .button {
     display: block;
     text-decoration: none;
@@ -47,7 +46,6 @@
     transition: background 0.2s, transform 0.1s;
   }
 
-  /* Page accueil boutons iOS */
   .home-buttons .button {
     background: #F2F2F7;  
     color: #000;           
@@ -63,7 +61,6 @@
     transform: scale(0.98);
   }
 
-  /* Grille résumé journée */
   .grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -78,7 +75,6 @@
   }
   .card img { width: 100%; border-radius: 8px; }
 
-  /* Superset vertical */
   .superset { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; align-items: center; }
   .exercise {
     background: #1e1e1e;
@@ -89,10 +85,8 @@
   }
   .exercise img { width: 100%; border-radius: 8px; }
 
-  /* Pause */
   .pause { margin-top: 10px; font-size: 16px; font-style: italic; color: #bbb; }
 
-  /* Navigation fixée en bas */
   .nav-buttons {
     position: fixed;
     bottom: 0;
@@ -103,9 +97,9 @@
     display: flex;
     justify-content: space-between;
     gap: 10px;
+     box-shadow: 0 -2px 6px rgba(0,0,0,0.4);
   }
 
-  /* Boutons style iOS 26 */
   .nav-buttons .button.retour {
     flex: 1;
     max-width: 120px;
@@ -127,22 +121,25 @@
   }
   .nav-buttons .button.suivant:active { background: #0060DF; }
 
-  /* Page accueil */
-  #home { 
-    justify-content: flex-start; 
-    padding-top: 40px;
+  #home { justify-content: flex-start; padding-top: 40px; }
+  .home-buttons { display: flex; flex-direction: column; justify-content: center; flex: 1; }
+
+  /* Bouton repos */
+  .reset {
+    margin-top: 8px;
+    background: #0A84FF;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
   }
-  .home-buttons {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    flex: 1;
-  }
+  .reset:active { background: #0060DF; }
 </style>
 </head>
 <body>
 
-<!-- Page d'accueil -->
+<!-- Page accueil -->
 <div id="home" class="page active">
   <h1>Mon Programme</h1>
   <div class="home-buttons">
@@ -166,14 +163,19 @@
 <div id="workoutPage" class="page">
   <h2 id="blockTitle">Bloc 1</h2>
   <div class="superset" id="supersetBlock"></div>
-  <div class="pause" id="pauseTime"></div>
+
+  <!-- Timer -->
+  <div class="pause">
+    Repos : <span id="pauseTime">--</span>
+    <br>
+    <button class="reset" onclick="startRest()">Démarrer / Reset repos</button>
+  </div>
+
   <div class="nav-buttons">
-    <a href="#" class="button retour" onclick="openDay(currentDay)">Retour</a>
+    <a href="#" class="button retour">Retour</a>
     <a href="#" class="button suivant" onclick="nextBlock()">Suivant</a>
   </div>
 </div>
-
-
 
 <script>
 const programme = {
@@ -200,8 +202,10 @@ const programme = {
   ]
 };
 
+
 let currentDay = 1;
 let currentBlock = 0;
+let restInterval;
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -218,7 +222,6 @@ function openDay(day) {
   programme[day].forEach(bloc => bloc.exos.forEach(exo => {
     grid.innerHTML += `<div class="card"><img src="${exo.img}" alt=""><h4>${exo.nom}</h4><p>${exo.reps}</p></div>`;
   }));
-
   document.querySelector('#dayPage .button.suivant').innerText = "Démarrer";
   showPage('dayPage');
 }
@@ -226,11 +229,11 @@ function openDay(day) {
 function startWorkout() {
   currentBlock = 0;
   showBlock();
-  document.querySelector('#workoutPage .button.suivant').innerText = "Suivant";
   showPage('workoutPage');
 }
 
 function showBlock() {
+  clearInterval(restInterval);
   const bloc = programme[currentDay][currentBlock];
   document.getElementById('blockTitle').innerText = "Bloc " + (currentBlock + 1);
   const supersetDiv = document.getElementById('supersetBlock');
@@ -238,10 +241,49 @@ function showBlock() {
   bloc.exos.forEach(exo => {
     supersetDiv.innerHTML += `<div class="exercise"><img src="${exo.img}" alt=""><h4>${exo.nom}</h4><p>${exo.reps}</p></div>`;
   });
-  document.getElementById('pauseTime').innerText = "Repos : " + bloc.pause;
+  document.getElementById('pauseTime').innerText = bloc.pause;
 }
 
-// Bouton "Suivant"
+// Convertit "75s" / "1min" en secondes
+function parsePause(pause) {
+  if (pause.includes("min")) {
+    return parseInt(pause) * 60;
+  } else if (pause.includes("s")) {
+    return parseInt(pause);
+  }
+  return 60;
+}
+
+function startRest() {
+  clearInterval(restInterval);
+  let duration = parsePause(programme[currentDay][currentBlock].pause);
+  const display = document.getElementById("pauseTime");
+
+  function update() {
+    let minutes = Math.floor(duration / 60);
+    let seconds = duration % 60;
+    display.textContent = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2,"0")}` : `${seconds}s`;
+    if (duration <= 0) {
+      clearInterval(restInterval);
+      playBeep();
+    }
+    duration--;
+  }
+
+  update();
+  restInterval = setInterval(update, 1000);
+}
+
+function playBeep() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const osc = ctx.createOscillator();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(1000, ctx.currentTime);
+  osc.connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.3);
+}
+
 function nextBlock() {
   if (currentBlock < programme[currentDay].length - 1) {
     currentBlock++;
@@ -252,14 +294,12 @@ function nextBlock() {
   }
 }
 
-// Bouton "Retour" dans la page workout
 document.querySelector('#workoutPage .button.retour').onclick = function(e) {
   e.preventDefault();
   if (currentBlock > 0) {
     currentBlock--;
     showBlock();
   } else {
-    // Si premier bloc → retour résumé
     openDay(currentDay);
   }
 };
