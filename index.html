@@ -21,7 +21,7 @@
       height: 100vh;
     }
     h1, h2, h4, p { margin: 10px 0; }
-    .page { display: none; flex: 1; flex-direction: column; text-align: center; padding: 20px; overflow-y: auto;  padding-bottom: 300px; }
+    .page { display: none; flex: 1; flex-direction: column; text-align: center; padding: 20px; overflow-y: auto; padding-bottom: 300px; }
     .active { display: flex; }
 
     .button {
@@ -31,7 +31,6 @@
       cursor: pointer;
       transition: background 0.2s, transform 0.1s;
     }
-
     .home-buttons .button {
       background: #F2F2F7;  
       color: #000;           
@@ -46,11 +45,9 @@
       background: #E5E5EA;
       transform: scale(0.98);
     }
-
     .grid { display: flex; flex-direction: column; gap: 15px; width: 100%; margin: 20px 0; align-content: center; }
     .card { background: #1e1e1e; border-radius: 10px; padding: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
     .card img { width: 100%; border-radius: 8px; }
-
     .superset { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; width: 100%; align-items: stretch; align-content: center; flex-wrap: wrap; }
     #dayGrid .exercise {
       display: flex;
@@ -103,7 +100,6 @@
     .nav-buttons .button.suivant:active { background: #0060DF; }
     #home { justify-content: flex-start; padding-top: 40px; }
     .home-buttons { display: flex; flex-direction: column; justify-content: center; flex: 1; }
-
     .reset { margin-top: 8px; background: #0A84FF; color: #fff; border: none; border-radius: 12px; padding: 10px 16px; cursor: pointer; }
     .reset:active { background: #0060DF; }
   </style>
@@ -173,23 +169,34 @@ const programme = {
 let currentDay = 1;
 let currentBlock = 0;
 let restInterval;
-let beepAudio;
 
-// --- AUDIO SIMPLE + iOS ---
+// --- AUDIO WEB AUDIO API pour iOS et musique en arrière-plan ---
+let audioCtx;
+let beepBuffer;
+
 function initAudio() {
-  if (!beepAudio) {
-    beepAudio = new Audio("img/beep.mp3");
-    beepAudio.play().then(() => {
-      beepAudio.pause();
-      beepAudio.currentTime = 0;
-    }).catch(e => console.log("Audio pas encore autorisé:", e));
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    fetch('img/beep.mp3')
+      .then(resp => resp.arrayBuffer())
+      .then(data => audioCtx.decodeAudioData(data))
+      .then(buffer => { beepBuffer = buffer; })
+      .catch(e => console.log("Erreur chargement beep:", e));
+
+    // Silence initial pour déverrouiller iOS
+    const source = audioCtx.createBufferSource();
+    source.buffer = audioCtx.createBuffer(1,1,22050);
+    source.connect(audioCtx.destination);
+    source.start();
   }
 }
 
 function playBeep() {
-  if (beepAudio) {
-    beepAudio.currentTime = 0;
-    beepAudio.play().catch(e => console.log("Audio bloqué:", e));
+  if (audioCtx && beepBuffer) {
+    const source = audioCtx.createBufferSource();
+    source.buffer = beepBuffer;
+    source.connect(audioCtx.destination);
+    source.start();
   }
 }
 
@@ -208,18 +215,10 @@ function openDay(day) {
   grid.innerHTML = '';
 
   const dayProgram = programme[day];
-
   dayProgram.forEach((bloc, i) => {
-    let blocHTML = `<div class="superset">
-      <h3>Bloc ${i + 1} (Repos: ${bloc.pause})</h3>`;
+    let blocHTML = `<div class="superset"><h3>Bloc ${i + 1} (Repos: ${bloc.pause})</h3>`;
     bloc.exos.forEach(exo => {
-      blocHTML += `<div class="exercise">
-        <img src="${exo.img}" alt="">
-        <div class="exercise_info">
-        <h4>${exo.nom}</h4>
-        <p>${exo.reps}</p>
-        </div>
-      </div>`;
+      blocHTML += `<div class="exercise"><img src="${exo.img}" alt=""><div class="exercise_info"><h4>${exo.nom}</h4><p>${exo.reps}</p></div></div>`;
     });
     blocHTML += `</div>`;
     grid.innerHTML += blocHTML;
@@ -249,11 +248,8 @@ function showBlock() {
 }
 
 function parsePause(pause) {
-  if (pause.includes("min")) {
-    return parseInt(pause) * 60;
-  } else if (pause.includes("s")) {
-    return parseInt(pause);
-  }
+  if (pause.includes("min")) return parseInt(pause)*60;
+  if (pause.includes("s")) return parseInt(pause);
   return 60;
 }
 
@@ -263,10 +259,10 @@ function startRest() {
   const display = document.getElementById("pauseTime");
 
   function update() {
-    let minutes = Math.floor(duration / 60);
+    let minutes = Math.floor(duration/60);
     let seconds = duration % 60;
-    display.textContent = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2,"0")}` : `${seconds}s`;
-    if (duration <= 0) {
+    display.textContent = minutes>0 ? `${minutes}:${seconds.toString().padStart(2,"0")}` : `${seconds}s`;
+    if (duration<=0) {
       clearInterval(restInterval);
       playBeep();
     }
@@ -278,7 +274,7 @@ function startRest() {
 }
 
 function nextBlock() {
-  if (currentBlock < programme[currentDay].length - 1) {
+  if (currentBlock < programme[currentDay].length-1) {
     currentBlock++;
     showBlock();
   } else {
