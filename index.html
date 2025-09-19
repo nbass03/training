@@ -243,34 +243,11 @@ let currentDay = 1;
 let currentBlock = 0;
 let restInterval;
 
-// --- AUDIO FIX POUR iOS ---
-let ctx;
-let unlocked = false;
-
-function initAudio() {
-  if (!ctx) {
-    ctx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (ctx.state === "suspended") {
-    ctx.resume();
-  }
-  unlocked = true;
-}
-
+// --- AUDIO SIMPLE (fichier mp3) ---
 function playBeep() {
-  if (!unlocked) return;
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = "sine";
-  osc.frequency.setValueAtTime(1000, ctx.currentTime);
-  gain.gain.setValueAtTime(0.2, ctx.currentTime);
-  osc.connect(gain).connect(ctx.destination);
-  osc.start();
-  osc.stop(ctx.currentTime + 0.3);
+  const beep = new Audio("img/beep.mp3");
+  beep.play().catch(e => console.log("Audio bloqué:", e));
 }
-
-// On "débloque" l'audio au premier clic
-document.addEventListener("click", initAudio, { once: true });
 
 // --- LOGIQUE DES PAGES ---
 function showPage(id) {
