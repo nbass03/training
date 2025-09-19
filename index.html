@@ -189,7 +189,7 @@ function initAudio() {
 function playBeep() {
   if (beepAudio) {
     beepAudio.currentTime = 0;
-    beepAudio.play().catch(e => console.log("Audio bloqué:", e));
+      initAudio(); // 🔊 déverrouille le son dès le premier clic
   }
 }
 
@@ -230,7 +230,6 @@ function openDay(day) {
 }
 
 function startWorkout() {
-  initAudio(); // 🔊 déverrouille le son dès le premier clic
   currentBlock = 0;
   showBlock();
   showPage('workoutPage');
