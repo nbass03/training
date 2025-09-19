@@ -61,15 +61,12 @@
     transform: scale(0.98);
   }
 
-
   .grid {
       display: flex;
-      grid-template-columns: repeat(2, 1fr);
+      flex-direction: column;
       gap: 15px;
       width: 100%;
       margin: 20px 0;
-      flex-direction: column;
-      align-content: center;
   }
   .card {
     background: #1e1e1e;
@@ -79,16 +76,12 @@
   }
   .card img { width: 100%; border-radius: 8px; }
 
-
   .superset {
       display: flex;
       flex-direction: column;
       gap: 15px;
       margin: 20px 0;
       width: 100%;
-      align-items: stretch;
-      align-content: center;
-      flex-wrap: wrap;
   }
 
   #dayGrid .exercise {
@@ -97,11 +90,9 @@
       background: #1e1e1e;
       border-radius: 10px;
       padding: 10px;
-      width: 90%;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
       width: 100%;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
       flex-direction: row;
-      justify-content: left;
       text-align: left;
   }
 
@@ -110,13 +101,11 @@
     border-radius: 8px;
   }
 
-  #dayGrid .exercise .exercise_info{
-    display: flex
-;
+  #dayGrid .exercise .exercise_info {
+    display: flex;
     flex-direction: column;
     justify-content: center;
   }
-
 
   .exercise {
     background: #1e1e1e;
@@ -139,7 +128,7 @@
     display: flex;
     justify-content: space-between;
     gap: 10px;
-     box-shadow: 0 -2px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 -2px 6px rgba(0,0,0,0.4);
   }
 
   .nav-buttons .button.retour {
@@ -210,7 +199,7 @@
   <div class="pause">
     Repos : <span id="pauseTime">--</span>
     <br>
-    <button class="reset" onclick="startRest()">Démarrer / Reset repos</button>
+    <button class="reset" onclick="initAudio(); startRest()">Démarrer / Reset repos</button>
   </div>
 
   <div class="nav-buttons">
@@ -244,10 +233,24 @@ const programme = {
   ]
 };
 
-
 let currentDay = 1;
 let currentBlock = 0;
 let restInterval;
+let audioCtx;
+
+// Débloquer l’audio au premier clic
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    gain.gain.value = 0;
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.01);
+    console.log("AudioContext initialisé");
+  }
+}
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -264,7 +267,6 @@ function openDay(day) {
 
   const dayProgram = programme[day];
 
-  // Afficher chaque bloc séparément
   dayProgram.forEach((bloc, i) => {
     let blocHTML = `<div class="superset">
       <h3>Bloc ${i + 1} (Repos: ${bloc.pause})</h3>`;
@@ -285,8 +287,6 @@ function openDay(day) {
   showPage('dayPage');
 }
 
-
-
 function startWorkout() {
   currentBlock = 0;
   showBlock();
@@ -305,7 +305,6 @@ function showBlock() {
   document.getElementById('pauseTime').innerText = bloc.pause;
 }
 
-// Convertit "75s" / "1min" en secondes
 function parsePause(pause) {
   if (pause.includes("min")) {
     return parseInt(pause) * 60;
@@ -336,13 +335,13 @@ function startRest() {
 }
 
 function playBeep() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const osc = ctx.createOscillator();
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
   osc.type = "sine";
-  osc.frequency.setValueAtTime(1000, ctx.currentTime);
-  osc.connect(ctx.destination);
+  osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+  osc.connect(audioCtx.destination);
   osc.start();
-  osc.stop(ctx.currentTime + 0.3);
+  osc.stop(audioCtx.currentTime + 0.3);
 }
 
 function nextBlock() {
