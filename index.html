@@ -170,26 +170,32 @@ const programme = {
   ]
 };
 
+
 let currentDay = 1;
 let currentBlock = 0;
 let restInterval;
-let beepAudio;
 
-// --- AUDIO SIMPLE + iOS ---
-function initAudio() {
-  if (!beepAudio) {
-    beepAudio = new Audio("img/beep.mp3");
-    beepAudio.play().then(() => {
-      beepAudio.pause();
-      beepAudio.currentTime = 0;
-    }).catch(e => console.log("Audio pas encore autorisé:", e));
-  }
-}
-
+// --- NOUVEAU BEEP VIA WEB AUDIO ---
 function playBeep() {
-  if (beepAudio) {
-    beepAudio.currentTime = 0;
-      initAudio(); // 🔊 déverrouille le son dès le premier clic
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(1000, ctx.currentTime);
+    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.2); // 200ms
+
+    oscillator.onended = () => ctx.close();
+  } catch (e) {
+    console.log("Impossible de jouer le beep:", e);
   }
 }
 
@@ -248,11 +254,8 @@ function showBlock() {
 }
 
 function parsePause(pause) {
-  if (pause.includes("min")) {
-    return parseInt(pause) * 60;
-  } else if (pause.includes("s")) {
-    return parseInt(pause);
-  }
+  if (pause.includes("min")) return parseInt(pause) * 60;
+  if (pause.includes("s")) return parseInt(pause);
   return 60;
 }
 
@@ -265,9 +268,10 @@ function startRest() {
     let minutes = Math.floor(duration / 60);
     let seconds = duration % 60;
     display.textContent = minutes > 0 ? `${minutes}:${seconds.toString().padStart(2,"0")}` : `${seconds}s`;
+
     if (duration <= 0) {
       clearInterval(restInterval);
-      playBeep();
+      playBeep(); // beep sans couper la musique
     }
     duration--;
   }
@@ -288,12 +292,8 @@ function nextBlock() {
 
 document.querySelector('#workoutPage .button.retour').onclick = function(e) {
   e.preventDefault();
-  if (currentBlock > 0) {
-    currentBlock--;
-    showBlock();
-  } else {
-    openDay(currentDay);
-  }
+  if (currentBlock > 0) currentBlock--;
+  showBlock();
 };
 </script>
 </body>
