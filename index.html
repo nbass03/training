@@ -136,6 +136,7 @@
   <div class="superset" id="supersetBlock"></div>
   <div class="pause">
     Repos : <span id="pauseTime">--</span>
+    <span id="repCounter"> (0)</span>
     <br>
     <button class="reset" onclick="initAudio(); startRest();">Démarrer / Reset repos</button>
   </div>
@@ -145,171 +146,183 @@
   </div>
 </div>
 
+<script>
+  // --- DONNÉES DU PROGRAMME ---
+  const programme = {
+    1: [
+      { pause: "75s", exos: [{ nom: "Incline DB chest press", reps: "4 × 8", img: "img/incline-db.jpg" }, { nom: "Lat pull down", reps: "4 × 8", img: "img/lat.jpg" }] },
+      { pause: "75s", exos: [{ nom: "Hammer chest press", reps: "3 × 10", img: "img/hammer.jpg" }, { nom: "Seated row", reps: "3 × 10", img: "img/seated-row.jpg" }] },
+      { pause: "75s", exos: [{ nom: "Pec deck", reps: "3 × 8–10", img: "img/pec-deck.jpg" }, { nom: "Supinated BB row", reps: "3 × 10–12", img: "img/supinated.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Seated chest press dropset", reps: "3 × 7-7-7", img: "img/chest-press.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Straight arm pulldown dropset", reps: "3 × 7-7-7", img: "img/pulldown.gif" }] },
+      { pause: "30s", exos: [{ nom: "Flutter kicks", reps: "3 × 40", img: "img/flutter.jpg" }] }
+    ],
+    2: [
+      { pause: "1min", exos: [{ nom: "Squat", reps: "4 × 8", img: "img/squat.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Leg press", reps: "3 × 10", img: "img/leg-press.jpg" }, { nom: "Glute ham raise", reps: "3 × 10", img: "img/ham-raise.jpg" }] },
+      { pause: "90s", exos: [{ nom: "Walking lunges", reps: "4 × 20", img: "img/walking-lunges.jpg" }, { nom: "Leg curl debout", reps: "4 × 10 par jambe", img: "img/leg-curl.jpg" }] },
+      { pause: "60s", exos: [{ nom: "Leg extension dropset", reps: "3 × 7-7-7", img: "img/leg-extension.jpg" }] },
+      { pause: "90s", exos: [{ nom: "Leg curl dropset", reps: "3 × 7-7-7", img: "img/leg-curl-couche.jpg" }] }
+    ],
+    3: [
+      { pause: "90s", exos: [{ nom: "Upright row", reps: "5 × 10", img: "img/upright-row.jpg" }, { nom: "Lateral raise", reps: "5 × 10", img: "img/lateral-raise.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Incline biceps curl", reps: "4 × 8", img: "img/incline-biceps-curl.jpg" }, { nom: "BB triceps pushdown", reps: "4 × 8", img: "img/triceps-pushdown.jpg" }] },
+      { pause: "2min", exos: [{ nom: "Biceps curl alterné", reps: "4 × 16", img: "img/curl-biceps-alterne.gif" }, { nom: "Lying triceps extension", reps: "4 × 12", img: "img/lying-triceps-extension.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Crunch sur BOSU", reps: "3 × 15", img: "img/crunch.jpg" }, { nom: "Knee raise", reps: "3 × 15", img: "img/knee-raise.jpg" }] }
+    ]
+  };
 
+  // --- VARIABLES GLOBALES ---
+  let currentDay = 1;
+  let currentBlock = 0;
+  let restInterval;
+  let blockReps = {}; // compteur reps par bloc
 
-  <script>
-    // --- DONNÉES DU PROGRAMME ---
-    const programme = {
-      1: [
-        { pause: "75s", exos: [{ nom: "Incline DB chest press", reps: "4 × 8", img: "img/incline-db.jpg" }, { nom: "Lat pull down", reps: "4 × 8", img: "img/lat.jpg" }] },
-        { pause: "75s", exos: [{ nom: "Hammer chest press", reps: "3 × 10", img: "img/hammer.jpg" }, { nom: "Seated row", reps: "3 × 10", img: "img/seated-row.jpg" }] },
-        { pause: "75s", exos: [{ nom: "Pec deck", reps: "3 × 8–10", img: "img/pec-deck.jpg" }, { nom: "Supinated BB row", reps: "3 × 10–12", img: "img/supinated.jpg" }] },
-        { pause: "1min", exos: [{ nom: "Seated chest press dropset", reps: "3 × 7-7-7", img: "img/chest-press.jpg" }] },
-        { pause: "1min", exos: [{ nom: "Straight arm pulldown dropset", reps: "3 × 7-7-7", img: "img/pulldown.gif" }] },
-        { pause: "30s", exos: [{ nom: "Flutter kicks", reps: "3 × 40", img: "img/flutter.jpg" }] }
-      ],
-      2: [
-        { pause: "1min", exos: [{ nom: "Squat", reps: "4 × 8", img: "img/squat.jpg" }] },
-        { pause: "1min", exos: [{ nom: "Leg press", reps: "3 × 10", img: "img/leg-press.jpg" }, { nom: "Glute ham raise", reps: "3 × 10", img: "img/ham-raise.jpg" }] },
-        { pause: "90s", exos: [{ nom: "Walking lunges", reps: "4 × 20", img: "img/walking-lunges.jpg" }, { nom: "Leg curl debout", reps: "4 × 10 par jambe", img: "img/leg-curl.jpg" }] },
-        { pause: "60s", exos: [{ nom: "Leg extension dropset", reps: "3 × 7-7-7", img: "img/leg-extension.jpg" }] },
-        { pause: "90s", exos: [{ nom: "Leg curl dropset", reps: "3 × 7-7-7", img: "img/leg-curl-couche.jpg" }] }
-      ],
-      3: [
-        { pause: "90s", exos: [{ nom: "Upright row", reps: "5 × 10", img: "img/upright-row.jpg" }, { nom: "Lateral raise", reps: "5 × 10", img: "img/lateral-raise.jpg" }] },
-        { pause: "1min", exos: [{ nom: "Incline biceps curl", reps: "4 × 8", img: "img/incline-biceps-curl.jpg" }, { nom: "BB triceps pushdown", reps: "4 × 8", img: "img/triceps-pushdown.jpg" }] },
-        { pause: "2min", exos: [{ nom: "Biceps curl alterné", reps: "4 × 16", img: "img/curl-biceps-alterne.gif" }, { nom: "Lying triceps extension", reps: "4 × 12", img: "img/lying-triceps-extension.jpg" }] },
-        { pause: "1min", exos: [{ nom: "Crunch sur BOSU", reps: "3 × 15", img: "img/crunch.jpg" }, { nom: "Knee raise", reps: "3 × 15", img: "img/knee-raise.jpg" }] }
-      ]
-    };
+  // --- AUDIO CONTEXT ---
+  let audioCtx;
+  let audioReady = false;
 
-    // --- VARIABLES GLOBALES ---
-    let currentDay = 1;
-    let currentBlock = 0;
-    let restInterval;
-
-    // --- AUDIO CONTEXT GLOBAL POUR iOS ---
-    let audioCtx;
-    let audioReady = false;
-
-    function initAudio() {
-      if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        audioReady = true;
-      }
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      audioReady = true;
     }
+  }
 
-    function playBeep() {
-      if (!audioReady) return;
+  function playBeep() {
+    if (!audioReady) return;
 
-      audioCtx.resume().then(() => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+    audioCtx.resume().then(() => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
 
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(1000, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
 
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
 
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
-        osc.onended = () => {
-          osc.disconnect();
-          gain.disconnect();
-        };
-      }).catch(e => console.error('Erreur resume():', e));
-    }
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.2);
+      osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+      };
+    }).catch(e => console.error('Erreur resume():', e));
+  }
 
-    // --- NAVIGATION PAGES ---
-    function showPage(id) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+  // --- NAVIGATION PAGES ---
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
 
-    function goHome() { showPage('home'); }
+  function goHome() { showPage('home'); }
 
-    function openDay(day) {
-      currentDay = day;
-      document.getElementById('dayTitle').innerText = "Jour " + day;
-      const grid = document.getElementById('dayGrid');
-      grid.innerHTML = '';
-      programme[day].forEach((bloc, i) => {
-        let blocHTML = `<div class="superset"><h3>Bloc ${i+1} (Repos : ${bloc.pause})</h3>`;
-        bloc.exos.forEach(exo => {
-          blocHTML += `<div class="exercise">
-            <img src="${exo.img}" alt="">
-            <div class="exercise_info">
-              <h4>${exo.nom}</h4>
-              <p>${exo.reps}</p>
-            </div>
-          </div>`;
-        });
-        blocHTML += `</div>`;
-        grid.innerHTML += blocHTML;
-      });
-      document.querySelector('#dayPage .button.suivant').innerText = "Démarrer";
-      showPage('dayPage');
-    }
-
-    function startWorkout() {
-      currentBlock = 0;
-      showBlock();
-      showPage('workoutPage');
-    }
-
-    function showBlock() {
-      clearInterval(restInterval);
-      const bloc = programme[currentDay][currentBlock];
-      document.getElementById('blockTitle').innerText = "Bloc " + (currentBlock + 1);
-      const supersetDiv = document.getElementById('supersetBlock');
-      supersetDiv.innerHTML = '';
+  function openDay(day) {
+    currentDay = day;
+    document.getElementById('dayTitle').innerText = "Jour " + day;
+    const grid = document.getElementById('dayGrid');
+    grid.innerHTML = '';
+    programme[day].forEach((bloc, i) => {
+      let blocHTML = `<div class="superset"><h3>Bloc ${i+1} (Repos : ${bloc.pause})</h3>`;
       bloc.exos.forEach(exo => {
-        supersetDiv.innerHTML += `
-          <div class="exercise">
-            <img src="${exo.img}" alt="">
+        blocHTML += `<div class="exercise">
+          <img src="${exo.img}" alt="">
+          <div class="exercise_info">
             <h4>${exo.nom}</h4>
             <p>${exo.reps}</p>
-          </div>`;
+          </div>
+        </div>`;
       });
-      document.getElementById('pauseTime').innerText = bloc.pause;
+      blocHTML += `</div>`;
+      grid.innerHTML += blocHTML;
+    });
+    document.querySelector('#dayPage .button.suivant').innerText = "Démarrer";
+    showPage('dayPage');
+  }
+
+  function startWorkout() {
+    currentBlock = 0;
+    showBlock();
+    showPage('workoutPage');
+  }
+
+  function showBlock() {
+    clearInterval(restInterval);
+    const bloc = programme[currentDay][currentBlock];
+    document.getElementById('blockTitle').innerText = "Bloc " + (currentBlock + 1);
+    const supersetDiv = document.getElementById('supersetBlock');
+    supersetDiv.innerHTML = '';
+    bloc.exos.forEach(exo => {
+      supersetDiv.innerHTML += `
+        <div class="exercise">
+          <img src="${exo.img}" alt="">
+          <h4>${exo.nom}</h4>
+          <p>${exo.reps}</p>
+        </div>`;
+    });
+    document.getElementById('pauseTime').innerText = bloc.pause;
+
+    // initialise compteur du bloc à 0 si inexistant
+    const key = currentDay + "-" + currentBlock;
+    if (blockReps[key] === undefined) {
+      blockReps[key] = 0;
     }
+    document.getElementById("repCounter").textContent = ` (${blockReps[key]})`;
+  }
 
-    function parsePause(pause) {
-      if (pause.includes("min")) return parseInt(pause) * 60;
-      if (pause.includes("s")) return parseInt(pause);
-      return 60;
-    }
+  function parsePause(pause) {
+    if (pause.includes("min")) return parseInt(pause) * 60;
+    if (pause.includes("s")) return parseInt(pause);
+    return 60;
+  }
 
-    function startRest() {
-      clearInterval(restInterval);
-      let duration = parsePause(programme[currentDay][currentBlock].pause);
-      const display = document.getElementById("pauseTime");
+  function startRest() {
+    clearInterval(restInterval);
 
-      function update() {
-        let minutes = Math.floor(duration / 60);
-        let seconds = duration % 60;
-        display.textContent = minutes > 0
-          ? `${minutes}:${seconds.toString().padStart(2,"0")}`
-          : `${seconds}s`;
+    // incrémente compteur
+    const key = currentDay + "-" + currentBlock;
+    blockReps[key]++;
+    document.getElementById("repCounter").textContent = ` (${blockReps[key]})`;
 
-        if (duration <= 0) {
-          clearInterval(restInterval);
-          playBeep();
-        }
-        duration--;
+    let duration = parsePause(programme[currentDay][currentBlock].pause);
+    const display = document.getElementById("pauseTime");
+
+    function update() {
+      let minutes = Math.floor(duration / 60);
+      let seconds = duration % 60;
+      display.textContent = minutes > 0
+        ? `${minutes}:${seconds.toString().padStart(2,"0")}`
+        : `${seconds}s`;
+
+      if (duration <= 0) {
+        clearInterval(restInterval);
+        playBeep();
       }
-
-      update();
-      restInterval = setInterval(update, 1000);
+      duration--;
     }
 
-    function nextBlock() {
-      if (currentBlock < programme[currentDay].length - 1) {
-        currentBlock++;
-        showBlock();
-      } else {
-        alert("Entraînement terminé 🎉");
-        goHome();
-      }
-    }
+    update();
+    restInterval = setInterval(update, 1000);
+  }
 
-    document.querySelector('#workoutPage .button.retour').onclick = function(e) {
-      e.preventDefault();
-      if (currentBlock > 0) currentBlock--;
+  function nextBlock() {
+    if (currentBlock < programme[currentDay].length - 1) {
+      currentBlock++;
       showBlock();
-    };
-  </script>
+    } else {
+      alert("Entraînement terminé 🎉");
+      goHome();
+    }
+  }
+
+  document.querySelector('#workoutPage .button.retour').onclick = function(e) {
+    e.preventDefault();
+    if (currentBlock > 0) currentBlock--;
+    showBlock();
+  };
+</script>
 </body>
 </html>
