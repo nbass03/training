@@ -117,7 +117,6 @@
     <a href="#" class="button" onclick="openDay(1)">Jour 1</a>
     <a href="#" class="button" onclick="openDay(2)">Jour 2</a>
     <a href="#" class="button" onclick="openDay(3)">Jour 3</a>
-    <a href="#" class="button" onclick="openDay(4)">Jour 4</a>
   </div>
 </div>
 
@@ -151,38 +150,27 @@
   // --- DONNÉES DU PROGRAMME ---
   const programme = {
     1: [
-      { pause: "90s", exos: [{ nom: "Pendulum squat", reps: "4 × 8", img: "img/pendulum.jpg" }] },
-      { pause: "90s", exos: [{ nom: "Leg press (pied bas)", reps: "3 × 10", img: "img/leg-press.jpg" }] },
-      { pause: "90s", exos: [{ nom: "Split squat", reps: "3 × 10 par jambe", img: "img/split_squat.jpg" }] },
-      { pause: "1min", exos: [{ nom: "Leg extension", reps: "3 × 12–15", img: "img/leg-extension.jpg" }] },
-      { pause: "1min", exos: [{ nom: "Adductors machine", reps: "3 × 12–15", img: "img/adduction.png" }] },
-      { pause: "1min", exos: [{ nom: "Biceps curl machine", reps: "3 × 12–15", img: "img/biceps_curl.jpg" }] },
-      { pause: "1min", exos: [{ nom: "Avant-bras prise supination", reps: "2 × 10", img: "img/avant-bras-suppination.png" }, { nom: "Avant-bras prise pronation", reps: "2 × 10", img: "img/avant-bras-pronation.gif" }] }
+      { pause: "75s", exos: [{ nom: "Incline DB chest press", reps: "4 × 8", img: "img/incline-db.jpg" }, { nom: "Lat pull down", reps: "4 × 8", img: "img/lat.jpg" }] },
+      { pause: "75s", exos: [{ nom: "Hammer chest press", reps: "3 × 10", img: "img/hammer.jpg" }, { nom: "Seated row", reps: "3 × 10", img: "img/seated-row.jpg" }] },
+      { pause: "75s", exos: [{ nom: "Pec deck", reps: "3 × 8–10", img: "img/pec-deck.jpg" }, { nom: "Supinated BB row", reps: "3 × 10–12", img: "img/supinated.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Seated chest press dropset", reps: "3 × 7-7-7", img: "img/chest-press.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Straight arm pulldown dropset", reps: "3 × 7-7-7", img: "img/pulldown.gif" }] },
+      { pause: "30s", exos: [{ nom: "Flutter kicks", reps: "3 × 40", img: "img/flutter.jpg" }] }
     ],
     2: [
-      { pause: "90s", exos: [{ nom: "Bench press", reps: "4 × 8–10", img: "img/Bench-Press.gif" }] },
-      { pause: "90s", exos: [{ nom: "Incline chest press machine", reps: "3 × 10–12", img: "img/Incline-Chest-Press-Machine.gif" }] },
-      { pause: "75s", exos: [{ nom: "Seated chest press (pronation)", reps: "3 × 10–12", img: "img/chest-press.jpg" }] },
-      { pause: "75s", exos: [{ nom: "Cable fly (on pulley)", reps: "3 × 12–15", img: "img/cable_fly.png" }] },
-      { pause: "1min", exos: [{ nom: "Decline chest press", reps: "3 × 12", img: "img/decline_chest_press.png" }] },
-      { pause: "1min", exos: [{ nom: "ABS machine", reps: "3 × 12", img: "img/abs_machine.png" }, { nom: "Leg raise", reps: "3 × 12", img: "img/leg_raise.jpg" }] }
+      { pause: "1min", exos: [{ nom: "Squat", reps: "4 × 8", img: "img/squat.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Leg press", reps: "3 × 10", img: "img/leg-press.jpg" }, { nom: "Glute ham raise", reps: "3 × 10", img: "img/ham-raise.jpg" }] },
+      { pause: "90s", exos: [{ nom: "Walking lunges", reps: "4 × 20", img: "img/walking-lunges.jpg" }, { nom: "Leg curl debout", reps: "4 × 10 par jambe", img: "img/leg-curl.jpg" }] },
+      { pause: "60s", exos: [{ nom: "Leg extension dropset", reps: "3 × 7-7-7", img: "img/leg-extension.jpg" }] },
+      { pause: "90s", exos: [{ nom: "Leg curl dropset", reps: "3 × 7-7-7", img: "img/leg-curl-couche.jpg" }] }
     ],
     3: [
-      { pause: "90s", exos: [{ nom: "Deadlift", reps: "3 × 10", img: "img/dead-lift.png" }] },
-      { pause: "90s", exos: [{ nom: "Hip thrust", reps: "4 × 10", img: "img/hip_thust.gif" }] },
-      { pause: "90s", exos: [{ nom: "Seated leg curl", reps: "3 × 12", img: "img/seated_leg_curl.jpg" }] },
-      { pause: "90s", exos: [{ nom: "Hack squat good morning", reps: "2–3 × 12", img: "img/hack_squat-gm.png" }] },
-      { pause: "1min", exos: [{ nom: "Abductors machine", reps: "3 × 15", img: "img/abductor.png" }] },
-      { pause: "1min", exos: [{ nom: "Seated calf raise", reps: "3 × 15", img: "img/calf_raise.png" }] },
-      { pause: "1min", exos: [{ nom: "Triceps pushdown machine", reps: "3 × 15", img: "img/triceps_pushdown.jpg" }] }
-    ],
-    4: [
-      { pause: "90s", exos: [{ nom: "Hammer strength machine", reps: "4 × 10", img: "img/hammer.jpg" }] },
-      { pause: "90s", exos: [{ nom: "T-bar row (prise large)", reps: "3 × 10", img: "img/seated-row.jpg" }] },
-      { pause: "75s", exos: [{ nom: "One DB row", reps: "3 × 10–12 par bras", img: "img/one_db_row.png" }] },
-      { pause: "75s", exos: [{ nom: "Lat pull down (prise neutre)", reps: "3 × 10–12", img: "img/lat_pull_down.png" }] },
-      { pause: "1min", exos: [{ nom: "Cable facepull", reps: "3 × 12–15", img: "img/facepull.jpg" }] },
-      { pause: "1min", exos: [{ nom: "Cable twist", reps: "3 × 12 par côté", img: "img/cable_twist.png" }, { nom: "Bicycle crunch", reps: "3 × 20–30", img: "img/bicycle_crunch.png" }] }
+      { pause: "90s", exos: [{ nom: "Upright row", reps: "5 × 10", img: "img/upright-row.jpg" }, { nom: "Lateral raise", reps: "5 × 10", img: "img/lateral-raise.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Incline biceps curl", reps: "4 × 8", img: "img/incline-biceps-curl.jpg" }, { nom: "BB triceps pushdown", reps: "4 × 8", img: "img/triceps-pushdown.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Hammer curls", reps: "4 × 10", img: "img/hammer-curls.jpg" }, { nom: "Overhead triceps extension", reps: "4 × 10", img: "img/overhead-triceps.jpg" }] },
+      { pause: "2min", exos: [{ nom: "Biceps curl alterné", reps: "4 × 12", img: "img/curl-biceps-alterne.gif" }, { nom: "Lying triceps extension", reps: "4 × 12", img: "img/lying-triceps-extension.jpg" }] },
+      { pause: "1min", exos: [{ nom: "Cable curls", reps: "3 × 12-15", img: "img/cable-curls.jpg" }, { nom: "Rope triceps pushdown", reps: "3 × 12-15", img: "img/rope-triceps.jpg" }] },
+      { pause: "30s", exos: [{ nom: "Crunch sur BOSU", reps: "3 × 15", img: "img/crunch.jpg" }, { nom: "Knee raise", reps: "3 × 15", img: "img/knee-raise.jpg" }] }
     ]
   };
 
